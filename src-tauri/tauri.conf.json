@@ -7,7 +7,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "lg-countdown",
+    "productName": "LG倒计时工具",
     "version": "1.0.0"
   },
   "tauri": {
@@ -53,6 +53,9 @@
         "timestampUrl": "",
         "webviewInstallMode": {
           "type": "downloadBootstrapper"
+        },
+        "wix": {
+          "language": "zh-CN"
         }
       }
     },

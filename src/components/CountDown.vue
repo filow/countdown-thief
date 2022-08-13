@@ -70,7 +70,7 @@ import { prefixZero } from "../utils/prefixZero";
 import { ElButton, ElMessage, ElInputNumber, ElRadioGroup, ElRadio } from 'element-plus';
 import { VideoPlay, VideoPause, Close, Refresh } from '@element-plus/icons-vue';
 import { twoDigit } from '../utils/filters';
-import { WebviewWindow, availableMonitors, primaryMonitor, getAll, appWindow } from '@tauri-apps/api/window';
+import { WebviewWindow, getAll, appWindow } from '@tauri-apps/api/window';
 import { emit } from '@tauri-apps/api/event';
 
 
@@ -105,29 +105,16 @@ watch(countDownText, (newVal) => {
 
 const openSubScreen = async () => {
   const width = 880;
-  const height = 300;
-  const monitors = await availableMonitors();
-  const curMonitor = await primaryMonitor();
-  let targetDisplay = monitors.find((display) => {
-    return display.position.x !== 0 || display.position.y !== 0
-  })
-  if (!targetDisplay) {
-    targetDisplay = curMonitor;
-  }
-  let x = targetDisplay.position.x
-  let y = targetDisplay.position.y + targetDisplay.size.height * targetDisplay.scaleFactor - height - 100;
-  // const urlHost = process.env.NODE_ENV === 'production' ? 'tauri://localhost/' : 'http://localhost:3000/'
+  const height = 270;
   const win = new WebviewWindow(
     'display', {
     alwaysOnTop: true,
     decorations: true,
     fileDropEnabled: false,
     resizable: true,
-    focus: false,
+    center: true,
     width,
     height,
-      x,
-      y,
     skipTaskbar: true,
     title: '倒计时小工具',
     url: '/?screen=1'
@@ -142,9 +129,6 @@ const openSubScreen = async () => {
       } catch {}
     }
   })
-  setTimeout(() => {
-    appWindow.setFocus()
-  }, 100)
   windowRef.value = win;
   windowVisible.value = true;
 }
