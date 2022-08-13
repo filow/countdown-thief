@@ -70,7 +70,7 @@ import { prefixZero } from "../utils/prefixZero";
 import { ElButton, ElMessage, ElInputNumber, ElRadioGroup, ElRadio } from 'element-plus';
 import { VideoPlay, VideoPause, Close, Refresh } from '@element-plus/icons-vue';
 import { twoDigit } from '../utils/filters';
-import { WebviewWindow, availableMonitors, primaryMonitor, getAll } from '@tauri-apps/api/window';
+import { WebviewWindow, availableMonitors, primaryMonitor, getAll, appWindow } from '@tauri-apps/api/window';
 import { emit } from '@tauri-apps/api/event';
 
 
@@ -116,7 +116,7 @@ const openSubScreen = async () => {
   }
   let x = targetDisplay.position.x
   let y = targetDisplay.position.y + targetDisplay.size.height * targetDisplay.scaleFactor - height - 100;
-  const urlHost = process.env.NODE_ENV === 'production' ? 'https://tauri.localhost/' : 'http://localhost:3000/'
+  // const urlHost = process.env.NODE_ENV === 'production' ? 'tauri://localhost/' : 'http://localhost:3000/'
   const win = new WebviewWindow(
     'display', {
     alwaysOnTop: true,
@@ -130,11 +130,21 @@ const openSubScreen = async () => {
       y,
     skipTaskbar: true,
     title: '倒计时小工具',
-    url: urlHost + '?screen=1'
+    url: '/?screen=1'
   })
   win.onCloseRequested(() => {
     windowVisible.value = false;
   })
+  appWindow.onCloseRequested(() => {
+    if (win) {
+      try {
+        win.close();
+      } catch {}
+    }
+  })
+  setTimeout(() => {
+    appWindow.setFocus()
+  }, 100)
   windowRef.value = win;
   windowVisible.value = true;
 }
@@ -153,6 +163,9 @@ const toggleSubScreen = async () => {
   else {
     windowVisible.value = true;
     await displayWin.show()
+    setTimeout(() => {
+      appWindow.setFocus()
+    }, 100)
   }
 }
 
