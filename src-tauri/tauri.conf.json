@@ -7,8 +7,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "LG倒计时工具",
-    "version": "1.0.0"
+    "productName": "LG-Countdown",
+    "version": "1.0.1"
   },
   "tauri": {
     "allowlist": {
@@ -70,7 +70,7 @@
         "fullscreen": false,
         "height": 610,
         "resizable": false,
-        "title": "倒计时控制台",
+        "title": "Countdown Console",
         "width": 710,
         "fileDropEnabled": false
       }
