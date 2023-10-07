@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1.0.2",
-    "vue": "^3.2.25"
+    "vue": "^3.2.25",
+    "vue-i18n": "9"
   },
   "devDependencies": {
     "@element-plus/icons-vue": "^2.0.9",

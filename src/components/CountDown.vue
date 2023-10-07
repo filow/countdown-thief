@@ -1,36 +1,44 @@
 <template>
   <div id="Countdown">
+    <div class="lang-setting">
+      <el-button-group size="small" class="ml-4">
+        <el-button @click="changeLang('en')" :type="locale === 'en' ? 'primary' : 'default'">En</el-button>
+        <el-button @click="changeLang('zh-CN')" :type="locale === 'zh-CN' ? 'primary' : 'default'">中</el-button>
+      </el-button-group>
+    </div>
+
     <div class="countdown">{{countDownText}}</div>
     <div class="controls">
-      <el-button type="primary" v-if="!isRunning" :icon="VideoPlay" :disabled="isRunning || countdown === 0" @click="startRunning">开始</el-button>
-      <el-button type="warning" v-else :icon="VideoPause" @click="pause">暂停</el-button>
-      <el-button type="danger" :icon="Close" :disabled="countdown < 0.005" @click="stopAll">停止</el-button>
-      <el-button type="info" :icon="Refresh" @click="reset">重置为{{twoDigit(memorizedCountDown)}}分钟</el-button>
-      <el-button @click="toggleSubScreen">{{windowVisible ? '隐藏' : '打开'}}子屏幕</el-button>
+      <el-button type="primary" v-if="!isRunning" :icon="VideoPlay" :disabled="isRunning || countdown === 0" @click="startRunning">{{$t('start')}}</el-button>
+      <el-button type="warning" v-else :icon="VideoPause" @click="pause">{{ $t('pause') }}</el-button>
+      <el-button type="danger" :icon="Close" :disabled="countdown < 0.005" @click="stopAll">{{ $t('stop') }}</el-button>
+      <el-button type="info" :icon="Refresh" @click="reset">{{ $t('reset', {time: twoDigit(memorizedCountDown)}) }}</el-button>
+      <el-button @click="remind">{{ $t('remind') }}</el-button>
+      <el-button @click="toggleSubScreen">{{windowVisible ? $t('close') : $t('open')}}{{ $t('subScreen') }}</el-button>
     </div>
     <table class="control-table">
       <tr>
-        <td>倒计时设置</td>
+        <td>{{ $t('timePeriod.title') }}</td>
         <td>
           <div>
-            <el-button @click="setCountDown(1)">1分钟</el-button>
-            <el-button @click="setCountDown(3)">3分钟</el-button>
-            <el-button @click="setCountDown(5)">5分钟</el-button>
-            <el-button @click="setCountDown(15)">15分钟</el-button>
-            <el-button @click="setCountDown(30)">30分钟</el-button>
+            <el-button @click="setCountDown(1)">1{{ $t('timePeriod.minute') }}</el-button>
+            <el-button @click="setCountDown(3)">3{{ $t('timePeriod.minute') }}</el-button>
+            <el-button @click="setCountDown(5)">5{{ $t('timePeriod.minute') }}</el-button>
+            <el-button @click="setCountDown(15)">15{{ $t('timePeriod.minute') }}</el-button>
+            <el-button @click="setCountDown(30)">30{{ $t('timePeriod.minute') }}</el-button>
           </div>
           <div class="custom">
-            <div>自定义时间</div>
+            <div>{{ $t('timePeriod.custom') }}</div>
             <el-input-number :controls="false" v-model="input.minutes" controls-position="right" :step="1" :min="0" :max="600"></el-input-number>
-            <div>分</div>
+            <div>{{ $t('timePeriod.min') }}</div>
             <el-input-number :controls="false" v-model="input.seconds" controls-position="right" :step="1" :min="0" :max="60"></el-input-number>
-            <div>秒</div>
-            <el-button style="margin-left: 10px;" @click="setInputCountDown">确定</el-button>
+            <div>{{ $t('timePeriod.sec') }}</div>
+            <el-button style="margin-left: 10px;" @click="setInputCountDown">{{ $t('timePeriod.confirm') }}</el-button>
           </div>
         </td>
       </tr>
       <tr>
-        <td>时间控制</td>
+        <td>{{ $t('timeControl.title') }}</td>
         <td class="timeOffsetControl">
           <div class="minusButtons">
             <el-button @click="timeChange(-10)">-10s</el-button>
@@ -47,17 +55,17 @@
         </td>
       </tr>
       <tr>
-        <td>平滑模式</td>
+        <td>{{ $t('thiefMode.title') }}</td>
         <td>
           <el-radio-group v-model="speed" class="speed-group">
-            <el-radio :label="0">关闭</el-radio>
+            <el-radio :label="0">{{ $t('thiefMode.close') }}</el-radio>
             <el-radio :label="1.1">1.1x</el-radio>
             <el-radio :label="1.2">1.2x</el-radio>
             <el-radio :label="1.3">1.3x</el-radio>
             <el-radio :label="1.4">1.4x</el-radio>
           </el-radio-group>
-          <div class="fluent-mode-tip">平滑模式下，减去时间时，将不会直接减去，而是加速倒计时，从而达到偷时间的效果。</div>
-          <div class="fluent-mode-count" v-if="times.toChange !== 0">平滑模式剩余待变化时间：{{ twoDigit(times.toChange / 1000) }}，还需要{{toChangeLeftTime}}秒</div>
+          <div class="fluent-mode-tip">{{ $t('thiefMode.tip') }}</div>
+          <div class="fluent-mode-count" v-if="times.toChange !== 0">{{ $t('thiefMode.timeLeft', {toChange: twoDigit(times.toChange / 1000), left: toChangeLeftTime}) }}</div>
         </td>
       </tr>
     </table>
@@ -67,11 +75,13 @@
 <script setup>
 import {computed, ref, shallowRef, watch} from 'vue';
 import { prefixZero } from "../utils/prefixZero";
-import { ElButton, ElMessage, ElInputNumber, ElRadioGroup, ElRadio } from 'element-plus';
+import { ElButton, ElMessage, ElInputNumber, ElRadioGroup, ElRadio, ElButtonGroup } from 'element-plus';
 import { VideoPlay, VideoPause, Close, Refresh } from '@element-plus/icons-vue';
 import { twoDigit } from '../utils/filters';
 import { WebviewWindow, getAll, appWindow } from '@tauri-apps/api/window';
 import { emit } from '@tauri-apps/api/event';
+import { useI18n } from 'vue-i18n'
+const { t, locale } = useI18n({ useScope: 'global' })
 
 
 const times = ref({
@@ -116,7 +126,7 @@ const openSubScreen = async () => {
     width,
     height,
     skipTaskbar: true,
-    title: '倒计时小工具',
+    title: '倒计时',
     url: '/?screen=1'
   })
   win.onCloseRequested(() => {
@@ -219,7 +229,7 @@ const startRunning = () => {
 }
 const setCountDown = (minutes) => {
   if (isRunning.value) {
-    ElMessage.error('倒计时中，请停止后再设定时间')
+    ElMessage.error(t('message.setCountDownError'))
     return;
   }
 
@@ -249,8 +259,17 @@ const setInputCountDown = () => {
       setCountDown(mergedMinutes);
     }
     else {
-      ElMessage.error('时间必须大于0')
+      ElMessage.error(t('message.timeToLowError'))
     }
+}
+
+const remind = () => {
+  emit('remind');
+}
+
+const changeLang = (lang) => {
+  locale.value = lang;
+  localStorage.setItem('lang', lang);
 }
 </script>
 
@@ -260,6 +279,12 @@ const setInputCountDown = () => {
   font-family: 'Digiface', sans-serif;
   font-size: 16vw;
   text-align: center;
+  user-select: none;
+}
+.lang-setting {
+  position: absolute;
+  right: 15px;
+  top: 15px;
 }
 .controls {
   display: flex;
